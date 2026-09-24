@@ -1,0 +1,17 @@
+{
+  "accounting_rule": "Scientific semantic work counts full-state/done samples, one accepted translation obligation per pinned source, mutation checks, and named producer/checker observations plus successors. Internal AST-node comparisons, parsing-only tests, compilation, documentation, rendering, static audits, and packaging are not double-counted.",
+  "campaign_semantic_work_cap": 150000,
+  "core_campaign_semantic_work": 120045,
+  "cumulative_semantic_work": 149980,
+  "earlier_public_rtl_clean_semantic_work": 4538,
+  "earlier_public_rtl_development_semantic_work": 4538,
+  "expanded_public_rtl_clean_replay_semantic_work": 5803,
+  "expanded_public_rtl_generation_semantic_work": 14422,
+  "final_core_checker_replay_semantic_work": 535,
+  "pre_release_small_checker_probe_semantic_work": 16,
+  "remaining_semantic_work": 20,
+  "software_regression_semantic_work": 83,
+  "software_regression_status": "PASS after one zero-semantic structural repair recheck",
+  "software_regression_tests": 19,
+  "structural_translation_node_comparisons_reported_separately": 601
+}
