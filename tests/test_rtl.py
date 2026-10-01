@@ -63,6 +63,7 @@ class RestrictedRTLTests(unittest.TestCase):
                 self.assertTrue(result["source_blob_verified"])
                 structural += int(result["structural_comparison_units"])
         self.assertEqual(structural, 601)
+        record("accepted_translation_validations", len(rows))
         record("structural_translation_comparison_units", structural)
 
     def test_eight_binding_mutations_are_rejected(self) -> None:
@@ -109,6 +110,42 @@ class RestrictedRTLTests(unittest.TestCase):
                 source_text + "\n", modified, item, raw,
                 RTL_PILOT.parse_cuttable(item["cuttable"]),
             )
+        record("source_byte_substitution_checks", 1)
+
+    def test_validator_rejects_detached_source_text_with_matching_ir(self) -> None:
+        """Changing detached text and IR cannot inherit the real source-byte hash."""
+        item = copy.deepcopy(next(row for row in manifest_rows()
+                                  if row["case_id"] == "cmos-counter-3"))
+        source_text, source_bytes, raw = translate(item)
+        changed_text = source_text.replace("count + 3'd1", "count + 3'd2")
+        changed_raw = copy.deepcopy(raw)
+        changed_raw["registers"][0]["next"][2][2] = ["const", 3, 2]
+        with self.assertRaises(rtl_translation_checker.TranslationValidationError):
+            rtl_translation_checker.validate_translation(
+                changed_text,
+                source_bytes,
+                item,
+                changed_raw,
+                RTL_PILOT.parse_cuttable(item["cuttable"]),
+            )
+        record("detached_source_text_joint_substitution_checks", 1)
+
+    def test_validator_rejects_external_cuttable_with_matching_ir(self) -> None:
+        """The manifest candidate universe cannot be replaced by caller policy plus IR."""
+        item = copy.deepcopy(next(row for row in manifest_rows()
+                                  if row["case_id"] == "cmos-counter-3"))
+        source_text, source_bytes, raw = translate(item)
+        changed_raw = copy.deepcopy(raw)
+        changed_raw["registers"][0]["cut"] = False
+        with self.assertRaises(rtl_translation_checker.TranslationValidationError):
+            rtl_translation_checker.validate_translation(
+                source_text,
+                source_bytes,
+                item,
+                changed_raw,
+                set(),
+            )
+        record("external_cuttable_joint_substitution_checks", 1)
 
 
 if __name__ == "__main__":

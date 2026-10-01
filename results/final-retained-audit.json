@@ -10,12 +10,15 @@
     "unique_generated_models": 109,
     "unknown_budget_controls": 2
   },
-  "final_cumulative_semantic_work": 149980,
+  "final_cumulative_semantic_work": 150022,
+  "post_fix_targeted_semantic_units": 21,
+  "post_fix_targeted_test_methods": 5,
   "public_manifest_rows": 10,
   "public_retained_bundles": 4,
   "public_translation_rows": 10,
   "scientific_search_repeated": false,
-  "software_regression_semantic_units": 83,
+  "semantic_work_overrun": 22,
+  "software_regression_semantic_units": 102,
   "software_regression_tests": 19,
   "status": "PASS"
 }

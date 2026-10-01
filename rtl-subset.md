@@ -37,10 +37,13 @@ from arbitrary RTL intent.
 source semantics. It imports neither `rtl_frontend`, the bundle producer, nor the
 bundle checker. For every manifest row it:
 
-1. recomputes the exact Git blob identifier from the consumed bytes;
+1. strictly decodes the consumed source bytes as UTF-8, requires any separately
+   supplied source text to be byte-identical after decoding, and recomputes the
+   exact Git blob identifier;
 2. independently lexes and parses the selected source module;
 3. checks clock, finite input-domain, initial-state, horizon, completion, and cut
-   bindings against the manifest;
+   bindings against the manifest; in particular, it parses the manifest
+   `cuttable` field internally and uses that set as the candidate universe;
 4. compiles source expressions through a separately written canonical compiler;
 5. independently parses the delivered equation IR; and
 6. requires exact canonical equality for every register next-state equation,
@@ -48,9 +51,14 @@ bundle checker. For every manifest row it:
 
 The reported 601 internal node comparisons are a diagnostic, while campaign
 accounting counts one accepted translation-validation obligation per pinned
-module. Eight fixed mutations cover source identity, source bytes, horizon,
-input domains, initialization, cut policy, completion, and case-priority
-lowering; all are rejected.
+module. Eight retained fixed mutations cover source identity, source bytes,
+horizon, input domains, initialization, cut policy, completion, and
+case-priority lowering; all are rejected. A separate source-byte substitution
+test and two post-review joint substitutions are also rejected: detached source
+text plus matching altered IR cannot inherit the real source-byte hash, and an
+external empty candidate set plus matching `cut=false` IR cannot replace a
+manifest that still declares the register cuttable. These controls harden the
+validator; they do not show that the retained ten translations were erroneous.
 
 A second path exhaustively enumerates every manifest trace through the horizon
 and compares the complete translated register vector and completion bit with

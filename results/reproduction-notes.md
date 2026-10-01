@@ -149,9 +149,13 @@ one worker, the bounded child process, wall/CPU measurements, and peak RSS. A
 separate static closure audit reports `PASS` without repeating scientific search.
 Finally, one retained core bundle is directly checked once more; the checker
 accepts it with 198 observations and 337 successors (535 semantic units). A
-three-bundle pre-release probe consumes 16 additional units. The final 19-test
-standard-library regression consumes 83 semantic units and records its repaired
-structural-only recheck separately.
+three-bundle pre-release probe consumes 16 additional units. The retained
+19-test standard-library regression is retrospectively corrected from 83 to 102
+semantic units: ten accepted translation validations, eight recorded binding
+mutations, and one independent source-byte substitution check had been omitted
+from the subtotal. The historical full suite was not rerun for this correction.
+Two actual pre-fix risk probes and a five-method, 21-unit post-fix translation
+regression are recorded separately.
 
 Final campaign accounting is:
 
@@ -164,14 +168,17 @@ Final campaign accounting is:
 | Expanded clean replay | 5803 |
 | Final retained core checker replay | 535 |
 | Pre-release three-bundle probe | 16 |
-| Final 19-test software regression | 83 |
-| **Cumulative** | **149980** |
-| Campaign cap | 150000 |
-| **Unused** | **20** |
+| Retained 19-test software regression, corrected | 102 |
+| Pre-fix static-risk probes | 2 |
+| Post-fix targeted translation regression | 21 |
+| **Cumulative executed** | **150022** |
+| Original planning cap | 150000 |
+| **Overrun from required repair validation** | **22** |
 
-Internal translation-AST node comparisons, compilation, documentation, rendering,
-and packaging are reported separately and are not double-counted as scientific
-semantic work. No further scientific command is run after this freeze.
+Internal translation-AST node comparisons, compilation, documentation,
+rendering, and packaging are reported separately and are not double-counted as
+scientific semantic work. No historical minimization or large-search command was
+rerun for the repair.
 
 The accepted source instances do not establish unrestricted parsing,
 proof-assistant correctness of either parser, equivalence to a third-party

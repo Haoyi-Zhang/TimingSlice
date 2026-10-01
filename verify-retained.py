@@ -88,10 +88,38 @@ def main() -> int:
                 f"retained bundle is not inclusion-minimal: {bundle_path.name}")
 
     accounting = load_json(root / "results" / "campaign-accounting.json")
-    require(accounting.get("cumulative_semantic_work") == 149980,
-            "final cumulative accounting is not 149980")
-    require(accounting.get("remaining_semantic_work") == 20,
-            "final remaining accounting is not 20")
+    require(accounting.get("historical_campaign_after_accounting_correction") == 149999,
+            "corrected historical accounting is not 149999")
+    require(accounting.get("cumulative_semantic_work") == 150022,
+            "final cumulative accounting is not 150022")
+    require(accounting.get("remaining_semantic_work") == 0,
+            "final remaining accounting is not zero")
+    require(accounting.get("semantic_work_overrun") == 22,
+            "final accounting does not expose the 22-unit repair overrun")
+    require(accounting.get("software_regression_semantic_work") == 102,
+            "corrected retained regression accounting is not 102")
+
+    pre_fix = load_json(root / "results" / "translation-static-risk-pre-fix.json")
+    require(pre_fix.get("results", {}).get(
+        "source_text_source_bytes_joint_substitution", {}).get("outcome") == "ACCEPT",
+        "pre-fix detached-text risk was not truthfully retained")
+    require(pre_fix.get("results", {}).get(
+        "external_cuttable_joint_substitution", {}).get("outcome") == "ACCEPT",
+        "pre-fix cuttable risk was not truthfully retained")
+    post_fix = load_json(root / "results" / "translation-static-risk-postfix.json")
+    require(post_fix.get("status") == "PASS" and post_fix.get("semantic_units_this_run") == 21,
+            "post-fix targeted translation receipt is not PASS/21")
+    counts = post_fix.get("counts", {})
+    require(counts.get("accepted_translation_validations") == 10,
+            "post-fix normal translation acceptance count is not 10")
+    require(counts.get("translation_binding_mutation_checks") == 8,
+            "post-fix retained binding-mutation count is not 8")
+    require(counts.get("source_byte_substitution_checks") == 1,
+            "post-fix source-byte substitution count is not 1")
+    require(counts.get("detached_source_text_joint_substitution_checks") == 1,
+            "post-fix detached-text joint check is missing")
+    require(counts.get("external_cuttable_joint_substitution_checks") == 1,
+            "post-fix cuttable joint check is missing")
 
     report = {
         "status": "PASS",
@@ -102,8 +130,11 @@ def main() -> int:
         "public_translation_rows": 10,
         "public_retained_bundles": 4,
         "software_regression_tests": 19,
-        "software_regression_semantic_units": 83,
-        "final_cumulative_semantic_work": 149980,
+        "software_regression_semantic_units": 102,
+        "post_fix_targeted_test_methods": 5,
+        "post_fix_targeted_semantic_units": 21,
+        "final_cumulative_semantic_work": 150022,
+        "semantic_work_overrun": 22,
         "boundary": "static closure audit only; mathematical and semantic claims rely on retained runs",
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

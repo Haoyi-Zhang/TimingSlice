@@ -1,7 +1,8 @@
 {
   "artifact": {
-    "campaign_cumulative_semantic_work": 149980,
-    "campaign_remaining_semantic_work": 20,
+    "campaign_cumulative_semantic_work": 150022,
+    "campaign_remaining_semantic_work": 0,
+    "campaign_semantic_work_overrun": 22,
     "case_files": 109,
     "claim_ledger_rows": 28,
     "external_resource_rows": 32,
@@ -15,9 +16,11 @@
     "public_rtl_sources": 10,
     "python_sources_compile": true,
     "retained_static_audit": true,
-    "software_regression_semantic_units": 83,
+    "software_regression_semantic_units": 102,
     "software_regression_tests": 19,
-    "status": "PASS"
+    "status": "PASS",
+    "targeted_translation_repair_semantic_units": 21,
+    "targeted_translation_repair_test_methods": 5
   },
   "paper": {
     "abstract_words": 227,

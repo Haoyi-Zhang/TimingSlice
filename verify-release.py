@@ -95,17 +95,57 @@ def audit_artifact(root: Path) -> dict[str, Any]:
     require(regression.get("tests_run", 0) >= 15, "software regression suite is too small")
     require(regression.get("failures") == 0 and regression.get("errors") == 0,
             "software regression receipt contains failures")
+    require(regression.get("semantic_units_this_run") == 102,
+            "retained software-regression accounting is not corrected to 102")
+    require(regression.get("suite_definition_after_repair_tests") == 21,
+            "repaired suite definition is not 21 tests")
+
+    pre_fix = read_json(root / "results" / "translation-static-risk-pre-fix.json")
+    require(pre_fix.get("results", {}).get(
+        "source_text_source_bytes_joint_substitution", {}).get("outcome") == "ACCEPT",
+        "pre-fix source-text risk receipt is missing or rewritten")
+    require(pre_fix.get("results", {}).get(
+        "external_cuttable_joint_substitution", {}).get("outcome") == "ACCEPT",
+        "pre-fix cuttable risk receipt is missing or rewritten")
+    targeted = read_json(root / "results" / "translation-static-risk-postfix.json")
+    require(targeted.get("status") == "PASS" and targeted.get("tests_run") == 5,
+            "post-fix targeted regression is not a five-method PASS")
+    require(targeted.get("semantic_units_this_run") == 21,
+            "post-fix targeted regression is not 21 semantic units")
+    targeted_counts = targeted.get("counts", {})
+    expected_targeted = {
+        "accepted_translation_validations": 10,
+        "translation_binding_mutation_checks": 8,
+        "source_byte_substitution_checks": 1,
+        "detached_source_text_joint_substitution_checks": 1,
+        "external_cuttable_joint_substitution_checks": 1,
+    }
+    for key, value in expected_targeted.items():
+        require(targeted_counts.get(key) == value,
+                f"post-fix targeted count differs: {key}")
 
     accounting = read_json(root / "results" / "campaign-accounting.json")
     cumulative = accounting.get("cumulative_semantic_work")
     ceiling = accounting.get("campaign_semantic_work_cap")
     remaining = accounting.get("remaining_semantic_work")
-    require(type(cumulative) is int and type(ceiling) is int and type(remaining) is int,
+    overrun = accounting.get("semantic_work_overrun")
+    require(type(cumulative) is int and type(ceiling) is int and
+            type(remaining) is int and type(overrun) is int,
             "campaign accounting fields are not integers")
-    require(cumulative + remaining == ceiling == 150000, "campaign accounting does not close")
+    require(ceiling == 150000 and cumulative == ceiling - remaining + overrun,
+            "campaign accounting does not close with remaining/overrun")
+    require(remaining == 0 and overrun == 22 and cumulative == 150022,
+            "final campaign totals are not 150022 with a 22-unit overrun")
+    require(accounting.get("historical_campaign_after_accounting_correction") == 149999,
+            "corrected historical freeze is not 149999")
     require(regression.get("semantic_units_this_run") ==
             accounting.get("software_regression_semantic_work"),
             "software regression work is not reconciled with campaign accounting")
+    require(accounting.get("translation_static_risk_pre_fix_semantic_work") == 2,
+            "pre-fix risk-probe work is not reconciled")
+    require(accounting.get("translation_static_risk_post_fix_semantic_work") ==
+            targeted.get("semantic_units_this_run"),
+            "post-fix targeted work is not reconciled")
 
     cases = sorted((root / "cases").glob("*.json"))
     require(len(cases) == 109, "fixture count is not 109")
@@ -144,6 +184,8 @@ def audit_artifact(root: Path) -> dict[str, Any]:
         "python_sources_compile": True,
         "software_regression_tests": regression["tests_run"],
         "software_regression_semantic_units": regression["semantic_units_this_run"],
+        "targeted_translation_repair_test_methods": targeted["tests_run"],
+        "targeted_translation_repair_semantic_units": targeted["semantic_units_this_run"],
         "paper_data_reconciliation": True,
         "retained_static_audit": True,
         "case_files": len(cases),
@@ -154,6 +196,7 @@ def audit_artifact(root: Path) -> dict[str, Any]:
         "literature_calibration_classes": classes,
         "campaign_cumulative_semantic_work": cumulative,
         "campaign_remaining_semantic_work": remaining,
+        "campaign_semantic_work_overrun": overrun,
     }
 
 
@@ -275,13 +318,13 @@ def audit_paper(paper: Path) -> dict[str, Any]:
 
 
 def audit_project(project: Path, artifact: Path) -> dict[str, Any]:
-    expected = {"paper", "artifact", "research-plan.md", "CURRENT-STATE.md"}
+    expected = {"README.md", "artifact", "paper"}
     actual = {path.name for path in project.iterdir()}
     require(actual == expected, f"project root entries differ: {sorted(actual)}")
     require(artifact.resolve() == (project / "artifact").resolve(),
             "artifact argument is not the project's artifact directory")
-    require((project / "research-plan.md").stat().st_size > 0, "research plan is empty")
-    require((project / "CURRENT-STATE.md").stat().st_size > 0, "current state is empty")
+    require((project / "paper" / "provenance" / "research-plan.md").stat().st_size > 0, "research plan is empty")
+    require((project / "paper" / "provenance" / "CURRENT-STATE.md").stat().st_size > 0, "current state is empty")
     text_suffixes = {".py", ".md", ".csv", ".json", ".txt", ".tex", ".bib", ".log", ".bbl"}
     private_markers = ("/" + "mnt/data", "/" + "home/oai", "sandbox" + ":", "user-" + "BTr")
     leaks: list[str] = []

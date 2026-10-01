@@ -20,12 +20,21 @@ def main() -> int:
     started = time.perf_counter()
     suite = unittest.defaultTestLoader.discover(str(root / "tests"), pattern="test_*.py")
     result = unittest.TextTestRunner(verbosity=2).run(suite)
-    semantic_keys = {
+    historical_semantic_keys = {
         "operator_value_checks",
         "checker_semantic_obligations",
         "dynamic_negative_control_sample_checks",
+        "accepted_translation_validations",
+        "translation_binding_mutation_checks",
+        "source_byte_substitution_checks",
     }
-    semantic_units = sum(COUNTS[key] for key in semantic_keys)
+    repair_semantic_keys = {
+        "detached_source_text_joint_substitution_checks",
+        "external_cuttable_joint_substitution_checks",
+    }
+    historical_semantic_units = sum(COUNTS[key] for key in historical_semantic_keys)
+    repair_semantic_units = sum(COUNTS[key] for key in repair_semantic_keys)
+    semantic_units = historical_semantic_units + repair_semantic_units
     report = {
         "status": "PASS" if result.wasSuccessful() else "FAIL",
         "tests_run": result.testsRun,
@@ -34,6 +43,8 @@ def main() -> int:
         "skipped": len(result.skipped),
         "wall_seconds": time.perf_counter() - started,
         "counts": dict(sorted(COUNTS.items())),
+        "historical_regression_semantic_units": historical_semantic_units,
+        "new_targeted_repair_semantic_units": repair_semantic_units,
         "semantic_units_this_run": semantic_units,
         "scope": "software regression; no minimization search or new scientific instance selection",
     }

@@ -82,8 +82,10 @@ also limits JSON size and frontier layers as described in `ir-contract.md`.
   checking, negative/canonical witness checking, and output reconstruction.
 - `src/rtl_frontend.py`: restricted untrusted RTL-to-equation translator.
 - `src/rtl_translation_checker.py`: separately implemented source parser,
-  compiler, blob/harness binder, and exact translation validator. It imports
-  neither the translator nor either bundle component.
+  compiler, blob/harness binder, and exact translation validator. It strictly
+  decodes the pinned source bytes, requires redundant caller text to match,
+  parses the manifest candidate set internally, and imports neither the
+  translator nor either bundle component.
 - `tests/oracles.py`: direct transition formulas for 13 semantic controls and
   truth-table oracles for 96 reduction instances.
 - `rtl-pilot.py`, `public_rtl/yosys/`: ten pinned public modules, exhaustive
@@ -115,9 +117,14 @@ bindings and performs 601 internal structural comparisons. Exhaustive reference
 replay covers 1,377 traces and 4,965 complete-state/completion samples. Four
 one-candidate inclusion-minimal bundles are accepted by the independent checker.
 Three dynamic mistranslations are detected after 2, 2, and 51 paired samples,
-and eight source/harness/equation binding mutations are rejected. These are
-finite results for the documented fragment, not a general source-language
-theorem.
+and eight retained source/harness/equation binding mutations are rejected. The
+review repair additionally rejects an independent source-byte substitution and
+two joint substitutions that previously escaped the validator: detached altered
+text plus matching altered IR with the real bytes unchanged, and an external
+empty candidate set plus matching `cut=false` IR while the manifest still names
+the candidate. The repair does not imply that the retained ten translations or
+trace data were wrong. These are finite results for the documented fragment,
+not a general source-language theorem.
 
 The post-completion control remains an adverse result: one retained equation
 creates 33 frontier pairs and 338 positive obligations, while retaining all three
@@ -133,13 +140,17 @@ change in the input environment. Inclusion minimality is relative to the final
 retained set, declared candidates, havoc abstraction, horizon, and observation;
 it is not minimum cardinality or program optimality.
 
-The final campaign accounting is 149,980 / 150,000 semantic units. The public
-expanded generation contributes 14,422 units, the clean replay 5,803, the
-retained direct checker replay 535, a three-bundle release probe 16, and the
-final 19-test software regression 83. Internal translation-AST comparisons,
-parsing-only tests, compilation, and packaging are reported separately and not
-double-counted. See `pilot-protocol.md` and
-`results/campaign-accounting.json`.
+The corrected retained accounting reaches 149,999 semantic units before this
+review repair. The historical 19-test regression is 102 rather than 83 units:
+the old subtotal omitted ten accepted translation validations, eight recorded
+binding mutations, and one independent source-byte substitution check. Two
+actual pre-fix risk probes and the 21-unit post-fix targeted translation
+regression bring the executed total to 150,022, exceeding the 150,000 planning
+ceiling by 22. No historical minimization or large search was rerun. Internal
+translation-AST comparisons, parsing-only tests, compilation, documentation,
+rendering, and packaging are reported separately and not double-counted. See
+`pilot-protocol.md`, `results/campaign-accounting.json`, and
+`results/translation-static-risk-repair-summary.json`.
 
 Original code, generated fixtures, proofs, and documentation use the included
 MIT license. Unmodified Yosys sources are redistributed with

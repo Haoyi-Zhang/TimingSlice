@@ -115,8 +115,12 @@ bounded reproduction runner or an enclosing OS policy for nontrivial workloads.
 The independent acceptance path is `checker.py` plus the supplied equation
 source and bundle. It imports no producer or reference-oracle module. Its trusted
 computing base includes its own IR parser, stack evaluator, closure logic,
-emitter reconstruction, the standard library and interpreter. The restricted
-frontend in `src/rtl_frontend.py` is outside this checker theorem: the public
-pilot compares five exercised translations against independent step functions,
-but no general source-to-IR preservation theorem is claimed. See
+emitter reconstruction, the standard library and interpreter. The artifact also
+delivers a restricted frontend for ten pinned modules and a separately written
+instance validator. The validator strictly decodes the unique pinned source
+bytes, requires any separately supplied text to match those bytes exactly,
+parses the manifest `cuttable` field itself, and binds that candidate universe
+to the delivered IR. The ten translations are additionally compared with
+independent step functions. These accepted-instance checks do not establish a
+general or mechanically verified Verilog-to-IR preservation theorem. See
 `rtl-subset.md` for the exact grammar and exclusions.

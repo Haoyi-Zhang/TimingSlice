@@ -83,12 +83,18 @@ horizon 64; they are safeguards, not theorem parameters. Insufficient semantic
 work returns UNKNOWN.
 
 The completed core campaign accounts for 120,045 units. The earlier five-module
-development and clean runs account for 4,538 each. The expanded generation adds 14,422; the final clean replay adds 5,803; and
-the retained direct checker replay adds 535. A three-bundle pre-release probe
-adds 16, and the 19-test software regression adds 83. The final cumulative total
-is **149,980 / 150,000 semantic units**, leaving 20. Compilation, documentation,
-and packaging are excluded. `results/campaign-accounting.json` records the
-non-overlapping components.
+development and clean runs account for 4,538 each. The expanded generation adds
+14,422; the final clean replay adds 5,803; the retained direct checker replay
+adds 535; and the three-bundle pre-release probe adds 16. A retrospective audit
+corrects the retained 19-test regression from 83 to 102 units by including ten
+accepted translations, eight binding mutations, and one independent source-byte
+substitution check. The corrected historical freeze is therefore 149,999. The
+review then executed two pre-fix risk probes and a 21-unit post-fix targeted
+translation regression, producing **150,022 semantic units in total**, or 22
+above the original 150,000 planning ceiling. No historical minimization or large
+search was repeated. Compilation, documentation, rendering, static audits, and
+packaging are excluded. `results/campaign-accounting.json` records every
+component and the overrun explicitly.
 
 A PASS means only that the fixed finite protocol succeeded. It does not establish
 unrestricted RTL translation, third-party simulator equivalence, accelerator

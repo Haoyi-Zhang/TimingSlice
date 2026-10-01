@@ -514,14 +514,37 @@ def _initial_state(text: str) -> dict[str, int]:
             for field in text.split(";")}
 
 
+def _cuttable_policy(text: str) -> set[str]:
+    """Parse the manifest-bound candidate set, rejecting ambiguous spellings."""
+    if type(text) is not str:
+        raise TranslationValidationError("manifest cut policy is not text")
+    names = [name.strip() for name in re.split(r"[,;]", text) if name.strip()]
+    if len(names) != len(set(names)):
+        raise TranslationValidationError("duplicate name in manifest cut policy")
+    if any(_IDENTIFIER.fullmatch(name) is None for name in names):
+        raise TranslationValidationError("invalid name in manifest cut policy")
+    return set(names)
+
+
 def validate_translation(source_text: str, source_bytes: bytes, manifest: dict[str, str],
                          raw: dict[str, Any], cuttable: set[str]) -> dict[str, Any]:
-    module = _parse_source(source_text, manifest["module"])
-    if module.clocks != {manifest["clock"]}:
-        raise TranslationValidationError("clock binding mismatch")
+    if type(source_bytes) is not bytes:
+        raise TranslationValidationError("source bytes are not bytes")
+    try:
+        bound_source_text = source_bytes.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as error:
+        raise TranslationValidationError("source bytes are not strict UTF-8") from error
+    if source_text != bound_source_text:
+        raise TranslationValidationError("source text does not match the pinned source bytes")
     actual_blob = _git_blob_sha(source_bytes)
     if actual_blob != manifest["blob_sha"]:
         raise TranslationValidationError("source blob does not match pinned provenance")
+    module = _parse_source(bound_source_text, manifest["module"])
+    if module.clocks != {manifest["clock"]}:
+        raise TranslationValidationError("clock binding mismatch")
+    manifest_cuttable = _cuttable_policy(manifest.get("cuttable", ""))
+    if type(cuttable) is not set or cuttable != manifest_cuttable:
+        raise TranslationValidationError("external cut policy differs from manifest binding")
     if set(raw) != {"id", "inputs", "registers", "wires", "done", "horizon"}:
         raise TranslationValidationError("model top-level schema")
     if raw["id"] != manifest["case_id"] or raw["horizon"] != int(manifest["horizon"]):
@@ -590,9 +613,10 @@ def validate_translation(source_text: str, source_bytes: bytes, manifest: dict[s
             current = ("mux", _as_boolean(condition, cw), value, current)
             expression_nodes += cn + vn + 1
         initial = overrides.get(name, signal.initial if signal.initial is not None else 0)
-        expected_registers.append((name, signal.width, initial, current, name in cuttable))
+        expected_registers.append((name, signal.width, initial, current,
+                                   name in manifest_cuttable))
         comparisons += expression_nodes
-    if set(overrides) - assigned or cuttable - assigned:
+    if set(overrides) - assigned or manifest_cuttable - assigned:
         raise TranslationValidationError("initial/cut policy names non-register")
     if len(raw["registers"]) != len(expected_registers):
         raise TranslationValidationError("register count mismatch")

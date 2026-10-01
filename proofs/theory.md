@@ -2,8 +2,10 @@
 
 These are mathematical arguments for a finite equation semantics. They are not
 proof-assistant-checked theorems about the Python implementation, and they do not
-establish that a Verilog frontend implements this semantics. Finite experiments
-exercise the constructions; they are not the proofs. The monotone core argument
+establish a general Verilog frontend theorem. The artifact does deliver a
+restricted frontend plus a separate accepted-instance validator for ten pinned
+modules; that finite evidence binds only those source/harness/IR instances.
+Finite experiments exercise the constructions; they are not the proofs. The monotone core argument
 is an adaptation of the established inductive-validity-core principle, not a
 novelty claim: Ghassabani, Gacek, and Whalen, FSE 2016,
 DOI 10.1145/2950290.2950346, Section 4.
@@ -421,9 +423,11 @@ by the IR, establish general parser or interpreter correctness, or replace the
 mathematical arguments above.
 
 The trusted boundary remains the supplied IR and its contract, the independent
-checker implementation, and the host runtime. The producer is untrusted for
-acceptance. A frontend translating public RTL to this IR, a verified checker,
-compact symbolic proof certificates, and realistic accelerator evaluation are
-not delivered. No evidence in this repository establishes novelty or TCAD
-submission readiness. These limitations are scientific scope statements, not
-claims about the difficulty of the underlying research question.
+checker implementation, both restricted source parsers, and the host runtime.
+The producer is untrusted for acceptance. A restricted frontend and separate
+instance validator are delivered for ten pinned public modules, but a general or
+mechanically verified Verilog frontend, a verified checker, compact symbolic
+proof certificates, and realistic accelerator evaluation are not delivered. No
+evidence in this repository establishes novelty or TCAD submission readiness.
+These limitations are scientific scope statements, not claims about the
+difficulty of the underlying research question.

@@ -152,8 +152,9 @@ def audit(root: Path, project: Path) -> dict[str, Any]:
             "paper no longer states the exact rejected-mutation count")
     require("two zero-budget controls return UNKNOWN" in main_tex,
             "paper no longer states the exact UNKNOWN controls")
-    require("149,980" in main_tex and "20" in main_tex,
-            "paper campaign accounting text is missing")
+    require("149,999" in main_tex and "150,022" in main_tex and
+            "22 above" in main_tex,
+            "paper corrected campaign accounting text is missing")
 
     bibliography = read_json(root / "results" / "bibliography-audit.json")
     require(bibliography.get("status") == "PASS" and bibliography.get("entries") == 56,
