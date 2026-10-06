@@ -73,18 +73,16 @@ def audit_artifact(root: Path) -> dict[str, Any]:
             forbidden.append(path.relative_to(root).as_posix())
     require(not forbidden, f"forbidden runtime/archive files: {forbidden}")
 
-    compile_result = subprocess.run(
-        ["python3", "-m", "compileall", "-q", "src", "tests", "reproduce.py",
-         "rtl-pilot.py", "run-tests.py", "verify-retained.py", "verify-release.py",
-         "verify-paper-data.py", "audit-bibliography.py"],
-        cwd=root, capture_output=True, text=True, check=False,
-    )
-    require(compile_result.returncode == 0, f"Python compile failure: {compile_result.stderr}")
-    # compileall creates caches; remove them so an audit does not dirty a clean tree.
-    for cache in sorted(root.rglob("__pycache__"), reverse=True):
-        for item in cache.iterdir():
-            item.unlink()
-        cache.rmdir()
+    # Check syntax without writing bytecode or deleting any checkout paths.
+    # compileall writes .pyc even under -B, so it is not a read-only audit.
+    sources = sorted(root.glob("*.py"))
+    sources += sorted((root / "src").rglob("*.py"))
+    sources += sorted((root / "tests").rglob("*.py"))
+    for source in sources:
+        try:
+            compile(source.read_bytes(), str(source), "exec")
+        except (SyntaxError, ValueError) as error:
+            raise ReleaseAuditError(f"Python compile failure in {source}: {error}") from error
 
     retained = read_json(root / "results" / "final-retained-audit.json")
     require(retained.get("status") == "PASS", "retained static audit is not PASS")
