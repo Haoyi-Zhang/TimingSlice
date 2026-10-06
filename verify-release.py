@@ -51,6 +51,20 @@ def git_blob_sha(data: bytes) -> str:
     return hashlib.sha1(f"blob {len(data)}\0".encode("ascii") + data).hexdigest()
 
 
+def forbidden_payload_paths(root: Path) -> list[str]:
+    """Check delivered content, not the outer checkout's Git metadata."""
+    forbidden = []
+    for path in root.rglob("*"):
+        relative = path.relative_to(root)
+        if relative.parts[0] == '.git':
+            continue
+        if path.name in {"__pycache__", ".git", ".pytest_cache", ".coverage"}:
+            forbidden.append(relative.as_posix())
+        elif path.is_file() and path.suffix in {".pyc", ".zip"}:
+            forbidden.append(relative.as_posix())
+    return forbidden
+
+
 def audit_artifact(root: Path) -> dict[str, Any]:
     required_files = {
         "README.md", "LICENSE", "ir-contract.md", "rtl-subset.md",
@@ -65,12 +79,7 @@ def audit_artifact(root: Path) -> dict[str, Any]:
     require(required_files <= present, f"artifact required files missing: {sorted(required_files - present)}")
     require(required_dirs <= present, f"artifact required directories missing: {sorted(required_dirs - present)}")
 
-    forbidden = []
-    for path in root.rglob("*"):
-        if path.name in {"__pycache__", ".git", ".pytest_cache", ".coverage"}:
-            forbidden.append(path.relative_to(root).as_posix())
-        elif path.is_file() and path.suffix in {".pyc", ".zip"}:
-            forbidden.append(path.relative_to(root).as_posix())
+    forbidden = forbidden_payload_paths(root)
     require(not forbidden, f"forbidden runtime/archive files: {forbidden}")
 
     # Check syntax without writing bytecode or deleting any checkout paths.
