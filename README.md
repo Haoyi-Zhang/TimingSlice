@@ -71,8 +71,17 @@ it runs the current software suite, retained audits, full finite core campaign,
 public replay, and direct checker under Ubuntu 24.04. Its scientific command
 group has a 240-second wall timeout, 180-second per-process CPU limit, and 1 GiB
 per-process virtual-memory limit. Raw output is uploaded even after failure.
-This workflow is prepared for execution; local review does not establish that
-it has run remotely.
+The completed Ubuntu 24.04/Python 3.12 run `37439368517` at head
+`d3e25e818f2abf6171de9aaee113d1410c9b2844` passes this workflow and the
+repository-integrity check. Its current suite passes all 27 methods (191 semantic
+units, 0.093 suite seconds). All 37 core result files, ten translations and ten
+validation records match the retained data. Public replay checks 4,965 samples
+and four retained bundles without repeating the historical minimization or
+public mutation campaign; those original negative controls remain retained.
+The separate receipts in `results/measurements/` record core and public-replay
+body wall/CPU times of 0.861/0.859 and 0.055/0.055 seconds and peak RSS of 20,828
+and 22,812 KiB. These are single-process, single-run observations, not total
+workflow timing or aggregate memory.
 
 The retained full equation campaign and public generation are also reproducible.
 Their original cumulative planning ceiling is already exceeded; later
