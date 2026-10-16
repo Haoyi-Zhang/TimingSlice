@@ -15,6 +15,12 @@ are not proof-assistant mechanized.
 
 ## Reproduce from this repository root
 
+The two paper schematics are direct Python vectors. Their optional renderer is
+`scripts/draw_schematics.py`, with plotting dependencies in
+`scripts/requirements-schematics.txt`. Run it to regenerate `figures/*.pdf`, or
+pass `--check` to check exact figure freshness. Scientific kernels retain their
+standard-library-only dependency boundary.
+
 No package installation, solver, simulator, GPU, network access, API, or file
 outside this repository is required for the finite scientific runs. Paper-data
 and full-project audits additionally require the companion `paper/` directory.
