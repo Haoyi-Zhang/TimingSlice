@@ -16,8 +16,7 @@ The Princeton publication record verifies the title, three-author order, DOI,
 ICCAD 2024 host proceedings, dependency-analysis/constraint-solving framing,
 six-design applicability statement, and a later repository publication date.
 DBLP supplies the proceedings page range and event-year record. The bibliography
-uses the proceedings year 2024. No correspondence, collaboration, or approval is
-inferred from author position.
+uses the proceedings year 2024.
 
 Publisher, DOI, institutional, author-page, and general scholarly-search routes
 did not yield the complete eight-page text in this environment. Consequently,
