@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create a citation-closure and metadata audit from a LaTeX/BibTeX manuscript."""
+"""Check citation closure and metadata fields without verifying primary sources."""
 from __future__ import annotations
 
 import argparse
@@ -80,15 +80,14 @@ def main() -> int:
             howpublished = field(body, "howpublished")
             locator = f"https://doi.org/{doi}" if doi else (url or howpublished)
             if key in calibrated:
-                basis = "full_text_calibration_record"
-                status = "FULL_TEXT_CALIBRATED"
+                basis = "retained_calibration_row_presence_only"
+                status = "CALIBRATION_RECORD_PRESENT"
             elif key in authoritative:
-                basis = ("author_institution_publication_record" if key == "vaneijk1998sequential"
-                         else "publisher_or_authoritative_index_metadata")
-                status = "AUTHORITATIVE_METADATA_VERIFIED"
+                basis = "preconfigured_metadata_category_not_reverified"
+                status = "PRECONFIGURED_METADATA_CATEGORY"
             else:
-                basis = "canonical_scholarly_metadata_and_manuscript_role_review"
-                status = "SCHOLARLY_METADATA_REVIEWED"
+                basis = "syntax_and_required_fields_only_no_primary_source_check"
+                status = "METADATA_FIELDS_PRESENT"
             rows.append({
                 "bibkey": key,
                 "entry_type": kind,
@@ -101,9 +100,9 @@ def main() -> int:
                 "required_fields_complete": "yes",
                 "verification_status": status,
                 "verification_basis": basis,
-                "access_date": "2026-10-15" if key == "vaneijk1998sequential" else "2026-09-16",
+                "access_date": "",
             })
-        require(len(rows) >= 55, "fewer than 55 bibliography rows")
+        require(bool(rows), "bibliography has no scholarly entries")
         args.out.parent.mkdir(parents=True, exist_ok=True)
         with args.out.open("w", newline="", encoding="utf-8") as handle:
             writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
@@ -115,10 +114,10 @@ def main() -> int:
             "cited_entries": len(cited),
             "missing_entries": 0,
             "uncited_entries": 0,
-            "full_text_calibrated": sum(r["verification_status"] == "FULL_TEXT_CALIBRATED" for r in rows),
-            "authoritative_metadata_verified": sum(r["verification_status"] == "AUTHORITATIVE_METADATA_VERIFIED" for r in rows),
-            "scholarly_metadata_reviewed": sum(r["verification_status"] == "SCHOLARLY_METADATA_REVIEWED" for r in rows),
-            "scope": "bibliographic reality/closure audit; verification status distinguishes full-text reading from metadata review",
+            "retained_calibration_records": sum(r["verification_status"] == "CALIBRATION_RECORD_PRESENT" for r in rows),
+            "preconfigured_metadata_categories": sum(r["verification_status"] == "PRECONFIGURED_METADATA_CATEGORY" for r in rows),
+            "other_metadata_field_records": sum(r["verification_status"] == "METADATA_FIELDS_PRESENT" for r in rows),
+            "scope": "Static citation closure and metadata fields only; retained row presence and preconfigured categories are not source access or original reading. No primary sources are verified by this command.",
         }
     except (OSError, BibliographyAuditError, csv.Error) as error:
         summary = {"status": "FAIL", "reason": str(error)}

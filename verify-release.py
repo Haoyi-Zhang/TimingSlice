@@ -239,7 +239,7 @@ def audit_paper(paper: Path, build_dir: Path | None = None) -> dict[str, Any]:
 
     keys, bodies = bib_entries(bib)
     require(len(keys) == len(set(keys)), "duplicate BibTeX keys")
-    require(len(keys) >= 50, "bibliography has fewer than 50 entries")
+    require(bool(keys), "bibliography has no scholarly entries")
     cited: set[str] = set()
     for match in re.finditer(r"\\cite(?:\[[^\]]*\])?\{([^}]+)\}", tex):
         cited |= {item.strip() for item in match.group(1).split(",") if item.strip()}

@@ -1,5 +1,8 @@
 # Literature evidence and comparison status
 
+This document records the literature-calibration snapshot of 2026-09-16.
+Access limitations below describe that snapshot, not later source availability.
+
 This file separates verified bibliographic facts, substantive full-text
 calibration, abstract-level screening, and unresolved comparisons. The
 manuscript cites **56 scholarly or formal-standard records**, and every

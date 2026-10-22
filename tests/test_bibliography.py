@@ -32,6 +32,36 @@ class BibliographyTests(unittest.TestCase):
         self.assertEqual(AUDIT.entries("@article{authorDisplay,\n title={Study}\n}")[0][:2],
                          ("article", "authorDisplay"))
 
+    def test_small_complete_fixture_does_not_claim_source_verification(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            keys=("calibrated_fixture","vaneijk1998sequential","fictional_fixture")
+            bib="".join(f"@article{{{key},\n author={{Owned Test Fixture}},\n"
+                        " title={Synthetic metadata fixture, not a scholarly source},\n"
+                        " year={2020},\n journal={Fixture Journal}\n}\n" for key in keys)
+            (root/'references.bib').write_text(bib,encoding='utf-8')
+            (root/'main.tex').write_text('\\cite{'+','.join(keys)+'}',encoding='utf-8')
+            (root/'calibration.csv').write_text('bibkey\ncalibrated_fixture\n',encoding='utf-8')
+            result=self.run_generator(root)
+            self.assertEqual(result.returncode,0,result.stderr)
+            with (root/'audit.csv').open(encoding='utf-8',newline='') as handle:
+                rows=list(csv.DictReader(handle))
+            self.assertEqual([r['verification_status'] for r in rows],
+                ['CALIBRATION_RECORD_PRESENT','PRECONFIGURED_METADATA_CATEGORY','METADATA_FIELDS_PRESENT'])
+            self.assertTrue(all(r['access_date']=='' for r in rows))
+            summary=json.loads((root/'summary.json').read_text(encoding='utf-8'))
+            self.assertEqual(summary['entries'],3)
+            self.assertIn('No primary sources are verified',summary['scope'])
+
+    def test_empty_bibliography_remains_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            for name,text in [('references.bib',''),('main.tex',''),('calibration.csv','bibkey\n')]:
+                (root/name).write_text(text,encoding='utf-8')
+            result=self.run_generator(root)
+            self.assertEqual(result.returncode,1)
+            self.assertIn('no scholarly entries',json.loads((root/'summary.json').read_text())['reason'])
+
     def test_full_generator_preserves_utf8_and_excludes_style_controls(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
